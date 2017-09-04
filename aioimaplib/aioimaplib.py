@@ -486,6 +486,11 @@ class IMAP4ClientProtocol(asyncio.Protocol):
         return response
 
     @asyncio.coroutine
+    def myrights(self, mailbox='INBOX'):
+        return(yield from self.execute(
+            Command('MYRIGHTS', self.new_tag(), mailbox, loop=self.loop)))
+
+    @asyncio.coroutine
     def getmetadata(self, mailbox, metadata):
         if 'METADATA' not in self.capabilities:
             raise Abort('server has not METADATA capability')
@@ -751,6 +756,10 @@ class IMAP4(object):
     @asyncio.coroutine
     def select(self, mailbox='INBOX'):
         return (yield from asyncio.wait_for(self.protocol.select(mailbox), self.timeout))
+
+    @asyncio.coroutine
+    def myrights(self, mailbox='INBOX'):
+        return (yield from asyncio.wait_for(self.protocol.myrights(mailbox), self.timeout))
 
     @asyncio.coroutine
     def namespace(self):
