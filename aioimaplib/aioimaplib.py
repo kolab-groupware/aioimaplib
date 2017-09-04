@@ -69,7 +69,7 @@ Commands = {
     'GETACL':       Cmd('GETACL',       (AUTH, SELECTED),           Exec.is_async),
     'GETQUOTA':     Cmd('GETQUOTA',     (AUTH, SELECTED),           Exec.is_async),
     'GETQUOTAROOT': Cmd('GETQUOTAROOT', (AUTH, SELECTED),           Exec.is_async),
-    'GETMETADATA':  Cmd('GETMETADATA',  (AUTH),                     Exec.is_async),
+    'GETMETADATA':  Cmd('GETMETADATA',  (AUTH, SELECTED),           Exec.is_async),
     'ID':           Cmd('ID',           (NONAUTH, AUTH, LOGOUT, SELECTED), Exec.is_async),
     'IDLE':         Cmd('IDLE',         (SELECTED,),                Exec.is_sync),
     'LIST':         Cmd('LIST',         (AUTH, SELECTED),           Exec.is_async),
