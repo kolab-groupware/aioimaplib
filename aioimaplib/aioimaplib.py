@@ -69,6 +69,7 @@ Commands = {
     'GETACL':       Cmd('GETACL',       (AUTH, SELECTED),           Exec.is_async),
     'GETQUOTA':     Cmd('GETQUOTA',     (AUTH, SELECTED),           Exec.is_async),
     'GETQUOTAROOT': Cmd('GETQUOTAROOT', (AUTH, SELECTED),           Exec.is_async),
+    'GETMETADATA':  Cmd('GETMETADATA',  (AUTH),                     Exec.is_async),
     'ID':           Cmd('ID',           (NONAUTH, AUTH, LOGOUT, SELECTED), Exec.is_async),
     'IDLE':         Cmd('IDLE',         (SELECTED,),                Exec.is_sync),
     'LIST':         Cmd('LIST',         (AUTH, SELECTED),           Exec.is_async),
@@ -485,6 +486,13 @@ class IMAP4ClientProtocol(asyncio.Protocol):
         return response
 
     @asyncio.coroutine
+    def getmetadata(self, mailbox, metadata):
+        if 'METADATA' not in self.capabilities:
+            raise Abort('server has not METADATA capability')
+        return (yield from self.execute(
+            Command('GETMETADATA', self.new_tag(), mailbox, metadata, loop=self.loop)))
+
+    @asyncio.coroutine
     def namespace(self):
         if 'NAMESPACE' not in self.capabilities:
             raise Abort('server has not NAMESPACE capability')
@@ -731,6 +739,10 @@ class IMAP4(object):
     @asyncio.coroutine
     def namespace(self):
         return (yield from asyncio.wait_for(self.protocol.namespace(), self.timeout))
+
+    @asyncio.coroutine
+    def getmetadata(self, mailbox, metadata):
+        return (yield from asyncio.wait_for(self.protocol.getmetadata(mailbox, metadata), self.timeout))
 
     @asyncio.coroutine
     def search(self, *criteria, charset='utf-8'):
