@@ -534,6 +534,22 @@ class IMAP4ClientProtocol(asyncio.Protocol):
                          prefix='UID' if by_uid else '', loop=self.loop, timeout=timeout)))
 
     @asyncio.coroutine
+    def sort(self, sort_criteria, *search_criteria, charset='utf-8', by_uid=False):
+        args = (sort_criteria, charset) + search_criteria
+        prefix = 'UID' if by_uid else ''
+
+        return (yield from self.execute(
+            Command('SORT', self.new_tag(), *args, prefix=prefix, loop=self.loop)))
+
+    @asyncio.coroutine
+    def thread(self, *search_criteria, algorithm='REFERENCES', charset='utf-8', by_uid=False):
+        args = (algorithm, charset) + search_criteria
+        prefix = 'UID' if by_uid else ''
+
+        return (yield from self.execute(
+            Command('THREAD', self.new_tag(), *args, prefix=prefix, loop=self.loop)))
+
+    @asyncio.coroutine
     def store(self, *args, by_uid=False):
         return (yield from self.execute(
             Command('STORE', self.new_tag(), *args,
@@ -752,6 +768,23 @@ class IMAP4(object):
     def uid_search(self, *criteria, charset='utf-8'):
         return (
             yield from asyncio.wait_for(self.protocol.search(*criteria, by_uid=True, charset=charset), self.timeout))
+
+    @asyncio.coroutine
+    def sort(self, sort_criteria, *search_criteria, charset='utf-8'):
+        return (yield from asyncio.wait_for(self.protocol.sort(sort_criteria, *search_criteria, charset=charset), self.timeout))
+
+    @asyncio.coroutine
+    def uid_sort(self, sort_criteria, *search_criteria, charset='utf-8'):
+        return (yield from asyncio.wait_for(self.protocol.sort(sort_criteria, *search_criteria, by_uid=True, charset=charset), self.timeout))
+
+    @asyncio.coroutine
+    def thread(self, *search_criteria, algorithm='REFERENCES', charset='utf-8'):
+        return (yield from asyncio.wait_for(self.protocol.thread(*search_criteria, algorithm=algorithm, charset=charset), self.timeout))
+
+    @asyncio.coroutine
+    def uid_thread(self, *search_criteria, algorithm='REFERENCES', charset='utf-8'):
+        return (yield from asyncio.wait_for(self.protocol.thread(*search_criteria, algorithm=algorithm, by_uid=True, charset=charset), self.timeout))
+
 
     @asyncio.coroutine
     def uid(self, command, *criteria):
