@@ -486,6 +486,8 @@ class IMAP4ClientProtocol(asyncio.Protocol):
 
     @asyncio.coroutine
     def namespace(self):
+        if 'NAMESPACE' not in self.capabilities:
+            raise Abort('server has not NAMESPACE capability')
         return (yield from self.execute(
             Command('NAMESPACE', self.new_tag(), loop=self.loop)))
 
