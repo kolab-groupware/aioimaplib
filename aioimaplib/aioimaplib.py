@@ -484,6 +484,11 @@ class IMAP4ClientProtocol(asyncio.Protocol):
             self.state = SELECTED
         return response
 
+    @asyncio.coroutine
+    def namespace(self):
+        return (yield from self.execute(
+            Command('NAMESPACE', self.new_tag(), loop=self.loop)))
+
     @change_state
     @asyncio.coroutine
     def close(self):
@@ -720,6 +725,10 @@ class IMAP4(object):
     @asyncio.coroutine
     def select(self, mailbox='INBOX'):
         return (yield from asyncio.wait_for(self.protocol.select(mailbox), self.timeout))
+
+    @asyncio.coroutine
+    def namespace(self):
+        return (yield from asyncio.wait_for(self.protocol.namespace(), self.timeout))
 
     @asyncio.coroutine
     def search(self, *criteria, charset='utf-8'):
